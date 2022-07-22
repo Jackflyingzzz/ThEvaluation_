@@ -7,6 +7,7 @@ Environment seen by the RL agent. It is the main class of the repo.
 #from tensorforce.environments import Environment
 #import tensorforce
 import sys
+import os
 
 cwd = os.getcwd()
 sys.path.append(cwd + "/../Simulation/")
