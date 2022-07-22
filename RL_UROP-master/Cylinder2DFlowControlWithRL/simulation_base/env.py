@@ -7,7 +7,7 @@ import shutil
 cwd = os.getcwd()
 sys.path.append(cwd + "/../")
 
-from Env2DCylinder import Env2DCylinder
+from Env2DCylinderModified import Env2DCylinderModified
 from probe_positions import probe_positions
 
 import numpy as np
@@ -29,8 +29,8 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                remesh=False,
                random_start=False,
                single_run=False,
-               horizon,
-               n_env):
+               horizon=nb_actuations,
+               n_env=1):
 
     def _init():
 
