@@ -172,7 +172,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
         simu_name = '_'.join([simu_name, next_param])
 
         # Pass parameters to the Environment class
-        env_2d_cylinder = Monitor(TimeLimit(Env2DCylinder(path_root=root,
+        env_2d_cylinder = Monitor(TimeLimit(Env2DCylinderModified(path_root=root,
                                                 geometry_params=geometry_params,
                                                 flow_params=flow_params,
                                                 solver_params=solver_params,
