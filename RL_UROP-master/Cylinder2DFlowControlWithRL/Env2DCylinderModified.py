@@ -74,7 +74,7 @@ class RingBuffer():
 
 
 # @printidc()
-class Env2DCylinder(gym.Env):
+class Env2DCylinderModified(gym.Env):
     """Environment for 2D flow simulation around a cylinder."""
 
     def __init__(self, path_root, geometry_params, flow_params, solver_params, output_params,
