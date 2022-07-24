@@ -15,7 +15,7 @@ source activate sb3
 
 NUM_PORT=6
 # check that all ports are free
-output=$(python3 -c "from utils import bash_check_avail; bash_check_avail($NUM_PORT)")
+#output=$(python3 -c "from utils import bash_check_avail; bash_check_avail($NUM_PORT)")
 
 if [ $output == "T" ]; then
     echo "Ports available, launch..."
