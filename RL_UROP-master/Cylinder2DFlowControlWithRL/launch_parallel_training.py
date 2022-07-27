@@ -13,7 +13,7 @@ from stable_baselines3.common.logger import Logger, HumanOutputFormat, DEBUG
 from stable_baselines3.sac import SAC
 
 from gym.wrappers.time_limit import TimeLimit
-from checkpoint_callback_sb3 import CheckpointLastN
+from checkpoint_callback_sb3 import CheckpointCallback
 #from tensorforce.agents import Agent
 #from tensorforce.execution import Runner
 
@@ -52,11 +52,11 @@ if __name__ == '__main__':
     config["ent_coef"] = "auto_0.01"
     config["target_entropy"] = "auto"
 
-    checkpoint_callback = CheckpointLastN(
+    checkpoint_callback = CheckpointCallback(
                                             save_freq=max(128//number_servers, 1),
-                                            num_to_keep=5,
-                                            save_buffer=True,
-                                            save_env_stats=True,
+                                            #num_to_keep=5,
+                                            #save_buffer=True,
+                                            #save_env_stats=True,
                                             save_path=savedir,
                                             name_prefix='SAC_model')
 
