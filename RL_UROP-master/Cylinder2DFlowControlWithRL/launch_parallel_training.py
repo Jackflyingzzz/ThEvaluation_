@@ -13,7 +13,7 @@ from stable_baselines3.common.logger import Logger, HumanOutputFormat, DEBUG
 from stable_baselines3.sac import SAC
 
 from gym.wrappers.time_limit import TimeLimit
-from checkpoint_callback_sb3 import CheckpointCallback
+from stable_baselines3.common.callbacks import CheckpointCallback
 #from tensorforce.agents import Agent
 #from tensorforce.execution import Runner
 
