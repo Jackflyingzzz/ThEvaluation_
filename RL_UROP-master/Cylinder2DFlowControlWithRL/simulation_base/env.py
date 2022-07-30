@@ -52,7 +52,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                            'template': 'geometry_2d.template_geo',  # relative path of geometry file template
                            'clscale': 1,
                            # mesh size scaling ratio (all mesh characteristic lenghts of geometry file scaled by this factor)
-                           'remesh': remesh,  # remesh toggle (from resume_env args)
+                           'remesh': False,  # remesh toggle (from resume_env args)
                            'jets_toggle': 1,  # toggle Jets --> 0 : No jets, 1: Yes jets
                            'jet_width': 0.1,  # Jet Width
                            'height_cylinder': 1,  # Cylinder Height
@@ -101,7 +101,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                                "zero_net_Qs": True,  # True for Q1 + Q2 = 0
                                "random_start": random_start}
 
-        inspection_params = {"plot": plot,
+        inspection_params = {"plot": False,
                              "dump_vtu": dump_vtu,
                              "dump_debug": dump_debug,
                              "dump_CL": dump_CL,
