@@ -24,15 +24,13 @@ NUM_PORT=30
 #JOB_ID_SPLIT=${PBS_JOBID%.*}
 #mkdir $HOME/jobs/$JOB_ID_SPLIT
 # launch servers
-echo "Launching the servers. This takes a few seconds..."
-let "n_sec_sleep = 20 * $NUM_PORT"
-echo "Wait $n_sec_sleep secs for servers to start..."
+
 
 #sleep 2
 
 #python3 launch_servers.py -p $FIRST_PORT -n $NUM_PORT&
 
-sleep $n_sec_sleep
+
 
 python3 launch_parallel_training.py -n $NUM_PORT
 
