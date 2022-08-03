@@ -37,7 +37,7 @@ if __name__ == '__main__':
     config = {}
 
     config["learning_rate"] = 5e-5
-    config["learning_starts"] = (1 * nb_actuations * number_servers) if restoredir is None else 0
+    config["learning_starts"] = 0
     config["batch_size"] = 128
 
     config["tau"] = 5e-3
