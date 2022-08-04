@@ -744,7 +744,7 @@ class Env2DCylinderModified(gym.Env):
 
             name = f'{self.env_number}_output.csv'
             if(not os.path.exists("saved_models")):
-                os.mkdir("saved_models")
+                os.makedirs("saved_models",exist_ok=True)
             if(not os.path.exists("saved_models/"+name)):
                 with open("saved_models/"+name, "w") as csv_file:
                     spam_writer=csv.writer(csv_file, delimiter=";", lineterminator="\n")
@@ -758,7 +758,7 @@ class Env2DCylinderModified(gym.Env):
             # Also write in Cylinder2DFlowControlWithRL folder (useful to have data of all episodes together in parallel runs)
             try:
                 if(not os.path.exists("../episode_averages")):
-                    os.mkdir("../episode_averages")
+                    os.makedirs("../episode_averages",exist_ok=True)
             except OSError as err:
                 print(err)
 
@@ -779,7 +779,7 @@ class Env2DCylinderModified(gym.Env):
 
             if(os.path.exists(f'saved_models/{name}')):
                 if(not os.path.exists("best_model")):
-                    shutil.copytree("saved_models", "best_model")
+                    copy_tree("saved_models", "best_model")
 
                 else :
                     with open(f'saved_models/{name}', 'r') as csvfile:
@@ -799,7 +799,7 @@ class Env2DCylinderModified(gym.Env):
                         print("best_model updated")
                         if(os.path.exists("best_model")):
                             shutil.rmtree("best_model")
-                        shutil.copytree("saved_models", "best_model")
+                        copy_tree("saved_models", "best_model")
 
         if self.inspection_params["dump_vtu"]==True and self.inspection_params["dump_vtu"] < 10000 and self.solver_step % self.inspection_params["dump_vtu"] == 0:
 
