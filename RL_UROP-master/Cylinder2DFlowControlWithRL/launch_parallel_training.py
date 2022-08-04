@@ -22,7 +22,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 
 
 if __name__ == '__main__':
-
+    torch.set_num_threads(86)
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--number-servers", required=True, help="number of servers to spawn", type=int)
     ap.add_argument("-s", "--savedir", required=False,
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     model = SAC('MlpPolicy', VecNormalize(env, gamma=config["gamma"]), tensorboard_log=savedir, **config)
     model.learn(150000, callback=[checkpoint_callback], log_interval=1)
 
-
+   
 
     name = "returns_tf.csv"
     if (not os.path.exists("saved_models")):
