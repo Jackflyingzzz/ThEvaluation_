@@ -24,8 +24,8 @@ simulation_duration = 50
 
 def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec area) during training
                dump_vtu=False,  # If not False, create vtu files of area, velocity, pressure, every 'dump_vtu' steps
-               dump_debug=100,  # If not False, output step info of ep,step,rec_area,L,D,jets Q* to saved_models/debug.csv, every 'dump_debug' steps
-               dump_CL=100,  # If not False, output step info of ep,step,rec_area,L,D,jets Q* to command line, every 'dump_CL' steps
+               dump_debug=500,  # If not False, output step info of ep,step,rec_area,L,D,jets Q* to saved_models/debug.csv, every 'dump_debug' steps
+               dump_CL=500,  # If not False, output step info of ep,step,rec_area,L,D,jets Q* to command line, every 'dump_CL' steps
                remesh=False,
                random_start=False,
                single_run=False,
@@ -102,9 +102,9 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                                "random_start": random_start}
 
         inspection_params = {"plot": False,
-                             "dump_vtu": dump_vtu,
-                             "dump_debug": dump_debug,
-                             "dump_CL": dump_CL,
+                             "dump_vtu": False,
+                             "dump_debug": 500,
+                             "dump_CL": 500,
                              "range_pressure_plot": [-2.0, 1],  # ylim for pressure dynamic plot
                              "range_drag_plot": [-0.175, -0.13],  # ylim for drag dynamic plot
                              "range_lift_plot": [-0.2, +0.2],  # ylim for lift dynamic plot
