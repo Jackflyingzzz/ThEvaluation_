@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     config = {}
 
-    config["learning_rate"] = 5e-5
+    config["learning_rate"] = 1e-4
     config["learning_starts"] = 0
     config["batch_size"] = 128
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     config["gamma"] = 0.99
     config["train_freq"] = 1
     config["target_update_interval"] = 1
-    config["gradient_steps"] = 32
+    config["gradient_steps"] = 16
 
     config["buffer_size"] = int(1e5)
     config["optimize_memory_usage"] = False
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     config["target_entropy"] = "auto"
 
     checkpoint_callback = CheckpointCallback(
-                                            save_freq=max(500, 1),
+                                            save_freq=max(250, 1),
                                             #num_to_keep=5,
                                             #save_buffer=True,
                                             #save_env_stats=True,
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     env = SubprocVecEnv([resume_env(nb_actuations,i) for i in range(number_servers)], start_method='spawn')
 
     model = SAC('MlpPolicy', VecNormalize(env, gamma=config["gamma"]), tensorboard_log=savedir, **config)
-    model.learn(100000, callback=[checkpoint_callback], log_interval=1)
+    model.learn(150000, callback=[checkpoint_callback], log_interval=1)
 
 
 
