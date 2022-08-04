@@ -46,7 +46,7 @@ if __name__ == '__main__':
     config["target_update_interval"] = 1
     config["gradient_steps"] = -1
 
-    config["buffer_size"] = int(1e5)
+    config["buffer_size"] = int(10e5)
     config["optimize_memory_usage"] = False
 
     config["ent_coef"] = "auto_0.01"
