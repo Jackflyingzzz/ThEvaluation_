@@ -777,29 +777,29 @@ class Env2DCylinderModified(gym.Env):
             self.episode_areas = np.array([])
             self.episode_lifts = np.array([])
 
-            if(os.path.exists(f'saved_models/{name}')):
-                if(not os.path.exists("best_model")):
-                    copy_tree("saved_models", "best_model")
+            #if(os.path.exists(f'saved_models/{name}')):
+                #if(not os.path.exists("best_model")):
+                    #copy_tree("saved_models", "best_model")
 
-                else :
-                    with open(f'saved_models/{name}', 'r') as csvfile:
-                        data = csv.reader(csvfile, delimiter = ';')
-                        for row in data:
-                            lastrow = row
-                        last_iter_drag = lastrow[1]  # get avg drag of last episode
+                #else :
+                    #with open(f'saved_models/{name}', 'r') as csvfile:
+                        #data = csv.reader(csvfile, delimiter = ';')
+                        #for row in data:
+                            #lastrow = row
+                        #last_iter_drag = lastrow[1]  # get avg drag of last episode
 
-                    with open(f'saved_models/{name}', 'r') as csvfile:
-                        data = csv.reader(csvfile, delimiter = ';')
-                        for row in data:
-                            lastrow = row
-                        best_iter_drag = lastrow[1]  # get avg drag of best episode in best_model/
+                    #with open(f'saved_models/{name}', 'r') as csvfile:
+                        #data = csv.reader(csvfile, delimiter = ';')
+                        #for row in data:
+                            #lastrow = row
+                        #best_iter_drag = lastrow[1]  # get avg drag of best episode in best_model/
 
                     # If last episode model is better than current best model, we replace the best model
-                    if float(best_iter_drag) < float(last_iter_drag):
-                        print("best_model updated")
-                        if(os.path.exists("best_model")):
-                            shutil.rmtree("best_model")
-                        copy_tree("saved_models", "best_model")
+                    #if float(best_iter_drag) < float(last_iter_drag):
+                        #print("best_model updated")
+                        #if(os.path.exists("best_model")):
+                            #shutil.rmtree("best_model")
+                        #copy_tree("saved_models", "best_model")
 
         if self.inspection_params["dump_vtu"]==True and self.inspection_params["dump_vtu"] < 10000 and self.solver_step % self.inspection_params["dump_vtu"] == 0:
 
