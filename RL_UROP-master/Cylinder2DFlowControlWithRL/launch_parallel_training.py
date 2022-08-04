@@ -7,11 +7,11 @@ import numpy as np
 from tqdm import tqdm
 from simulation_base.env import resume_env, nb_actuations
 
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize, VecFrameStack
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.logger import Logger, HumanOutputFormat, DEBUG
 from stable_baselines3.sac import SAC
-
+import torch
 from gym.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.callbacks import CheckpointCallback
 #from tensorforce.agents import Agent
@@ -22,7 +22,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 
 
 if __name__ == '__main__':
-    torch.set_num_threads(86)
+    torch.set_num_threads(96)
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--number-servers", required=True, help="number of servers to spawn", type=int)
     ap.add_argument("-s", "--savedir", required=False,
@@ -36,15 +36,15 @@ if __name__ == '__main__':
 
     config = {}
 
-    config["learning_rate"] = 1e-4
+    config["learning_rate"] = 5e-5
     config["learning_starts"] = 0
-    config["batch_size"] = 128
+    config["batch_size"] = 150
 
     config["tau"] = 5e-3
     config["gamma"] = 0.99
     config["train_freq"] = 1
     config["target_update_interval"] = 1
-    config["gradient_steps"] = 16
+    config["gradient_steps"] = -1
 
     config["buffer_size"] = int(1e5)
     config["optimize_memory_usage"] = False
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     config["target_entropy"] = "auto"
 
     checkpoint_callback = CheckpointCallback(
-                                            save_freq=max(250, 1),
+                                            save_freq=max(15, 1),
                                             #num_to_keep=5,
                                             #save_buffer=True,
                                             #save_env_stats=True,
@@ -63,8 +63,8 @@ if __name__ == '__main__':
 
     env = SubprocVecEnv([resume_env(nb_actuations,i) for i in range(number_servers)], start_method='spawn')
 
-    model = SAC('MlpPolicy', VecNormalize(env, gamma=config["gamma"]), tensorboard_log=savedir, **config)
-    model.learn(150000, callback=[checkpoint_callback], log_interval=1)
+    model = SAC('MlpPolicy', VecFrameStack(env, n_stack=10), tensorboard_log=savedir, **config)
+    model.learn(15000000, callback=[checkpoint_callback], log_interval=1)
 
    
 
