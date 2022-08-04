@@ -18,11 +18,11 @@ from generate_msh import generate_mesh
 from flow_solver import FlowSolver
 from msh_convert import convert
 from dolfin import *
-
+from distutils.dir_util import copy_tree
 import numpy as np
 import os
 from collections import deque
-import pickle
+
 
 import time
 import math
@@ -43,7 +43,7 @@ import numpy as np
 import csv
 import scipy.signal as sgn
 import io
-
+import pickle5 as pickle
 
 # TODO: check that right types etc from tensorfoce examples
 # typically:
