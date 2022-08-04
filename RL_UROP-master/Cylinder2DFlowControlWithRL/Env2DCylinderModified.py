@@ -671,7 +671,7 @@ class Env2DCylinderModified(gym.Env):
             # Save everything that happens in a debug.csv file!
             name = f'{self.env_number}_debug.csv'
             if(not os.path.exists("saved_models")):
-                os.mkdir("saved_models")
+                os.makedirs("saved_models",exist_ok=True)
             if(not os.path.exists("saved_models/"+name)):
                 with open("saved_models/"+name, "w") as csv_file:
                     spam_writer=csv.writer(csv_file, delimiter=";", lineterminator="\n")
@@ -709,7 +709,7 @@ class Env2DCylinderModified(gym.Env):
         '''
         name = "test_strategy.csv"
         if(not os.path.exists("saved_models")):
-            os.mkdir("saved_models")
+            os.makedir("saved_models",exist_ok=True)
         if(not os.path.exists("saved_models/"+name)):
             with open("saved_models/"+name, "w") as csv_file:
                 spam_writer=csv.writer(csv_file, delimiter=";", lineterminator="\n")
