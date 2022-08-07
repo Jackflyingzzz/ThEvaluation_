@@ -99,7 +99,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                                "max_value_jet_MFR": 0.1,
                                "smooth_control": 0.1,  # parameter alpha to smooth out control
                                "zero_net_Qs": True,  # True for Q1 + Q2 = 0
-                               "random_start": random_start}
+                               "random_start": True}
 
         inspection_params = {"plot": False,
                              "dump_vtu": False,
