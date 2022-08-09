@@ -4,13 +4,10 @@ import numpy as np
 import csv
 import sys
 import os
-import shutil
-cwd = os.getcwd()
-sys.path.append(cwd + "/../")
 
 from Env2DCylinderModified import Env2DCylinderModified
 from probe_positions import probe_positions
-
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize, VecFrameStack
 import numpy as np
 from dolfin import Expression
 #from printind.printind_function import printi, printiv
@@ -24,159 +21,10 @@ import os
 import json
 import pandas as pd
 from tqdm import trange
-
+from sb3_contrib import TQC
 from stable_baselines3 import SAC
 from Env2DCylinderModified import Env2DCylinderModified
 from simulation_base.env import resume_env, nb_actuations, simulation_duration
-
-nb_actuations = 100# Number of actions (NN actuations) taken per episode (Number of action intervals)
-
-simulation_duration = 5  # duree en secondes de la simulation #50.0 default
-dt = 0.004
-single_input = False
-single_output = False
-include_actions = False
-
-root = 'mesh/turek_2d'  # Root of geometry file path
-if (not os.path.exists('mesh')):
-    os.mkdir('mesh')
-
-geometry_params = {'output': '.'.join([root, 'geo']),
-                   # mesh/turek_2d.geo // relative output path of geometry file according to geo params
-                   'template': 'geometry_2d.template_geo',  # relative path of geometry file template
-                   'clscale': 1,
-                   # mesh size scaling ratio (all mesh characteristic lenghts of geometry file scaled by this factor)
-                   'remesh': False,  # remesh toggle (from resume_env args)
-                   'jets_toggle': 1,  # toggle Jets --> 0 : No jets, 1: Yes jets
-                   'jet_width': 0.1,  # Jet Width
-                   'height_cylinder': 1,  # Cylinder Height
-                   'ar': 1.0,  # Cylinder Aspect Ratio
-                   'cylinder_y_shift': 0,  # Cylinder Center Shift from Centreline, Positive UP
-                   'x_upstream': 20,  # Domain Upstream Length (from left-most rect point)
-                   'x_downstream': 26,  # Domain Downstream Length (from right-most rect point)
-                   'height_domain': 25,  # Domain Height
-                   'mesh_size_cylinder': 0.075,  # Mesh Size on Cylinder Walls
-                   'mesh_size_jets': 0.015,  # Mesh size on jet boundaries
-                   'mesh_size_medium': 0.45,  # Medium mesh size (at boundary where coarsening starts)
-                   'mesh_size_coarse': 1,  # Coarse mesh Size Close to Domain boundaries outside wake
-                   'coarse_y_distance_top_bot': 4,  # y-distance from center where mesh coarsening starts
-                   'coarse_x_distance_left_from_LE': 2.5}  # x-distance from upstream face where mesh coarsening starts
-
-profile = Expression(('1', '0'), degree=2)  # Inflow profile (defined as FEniCS expression)
-
-flow_params = {'mu': 1E-2,  # Dynamic viscosity. This in turn defines the Reynolds number: Re = U * D / mu
-               'rho': 1,  # Density
-               'inflow_profile': profile}  # flow_params['inflow_profile'] stores a reference to the profile function
-
-solver_params = {'dt': dt}
-
-# Define probes positions
-probe_distribution = {'distribution_type': 'base',
-                      'probes_at_jets': False,
-                      # Whether to use probes at jets or not (for distributions other than 'rabault151'
-                      'n_base': 64}  # Number of probes at cylinder base if 'base' distribution is used
-
-list_position_probes = probe_positions(probe_distribution, geometry_params)
-
-output_params = {'locations': list_position_probes,  # List of (x,y) np arrays with probe positions
-                 'probe_type': 'pressure',  # Set quantity measured by probes (pressure/velocity)
-                 'single_input': single_input,
-                 # whether to feed as input probe values or difference between average top/bottom pressures
-                 'single_output': single_output,  # whether policy network outputs one or two outputs
-                 'symmetric': False,
-                 'include_actions': include_actions
-                 }
-
-optimization_params = {"num_steps_in_pressure_history": 1,
-                       # Number of steps that constitute an environment state (state shape = this * len(locations))
-                       "min_value_jet_MFR": -0.1,  # Set min and max Q* for weak actuation
-                       "max_value_jet_MFR": 0.1,
-                       "smooth_control": 0.1,  # parameter alpha to smooth out control
-                       "zero_net_Qs": True,  # True for Q1 + Q2 = 0
-                       "random_start": False}
-
-inspection_params = {"plot": False,
-                     "dump_vtu": False,
-                     "dump_debug": 1,
-                     "dump_CL": 100,
-                     "range_pressure_plot": [-2.0, 1],  # ylim for pressure dynamic plot
-                     "range_drag_plot": [-0.175, -0.13],  # ylim for drag dynamic plot
-                     "range_lift_plot": [-0.2, +0.2],  # ylim for lift dynamic plot
-                     "line_drag": -0.7221,  # Mean drag without control
-                     "line_lift": 0,  # Mean lift without control
-                     "show_all_at_reset": False,
-                     "single_run": True,
-                     'index': 1
-                     }
-
-reward_function = 'drag_plain_lift'
-
-# Ensure that SI is True only if probes on body base, and record pressure
-output_params['single_input'] = (
-            single_input and probe_distribution['distribution_type'] == 'base' and output_params[
-        'probe_type'] == 'pressure')
-
-verbose = 0  # For detailed output (see Env2DCylinder)
-
-number_steps_execution = int((simulation_duration/dt) / nb_actuations)  # Duration in timesteps of action interval (Number of numerical timesteps over which NN action is kept constant, control being interpolated)
-
-# ---------------------------------------------------------------------------------
-# do the initialization
-
-# If remesh = True, we sim with no control until a well-developed unsteady wake is obtained. That state is saved and
-# used as a start for each subsequent learning episode.
-
-# If so, set the value of n-iter (no. iterations to calculate converged initial state)
-if (geometry_params['remesh']):
-    n_iter = int(225.0 / dt)  # default: 200
-    if (os.path.exists('mesh')):
-        shutil.rmtree('mesh')  # If previous mesh directory exists, we delete it
-    os.mkdir('mesh')  # Create new empty mesh directory
-    print("Make converge initial state for {} iterations".format(n_iter))
-else:
-    n_iter = None
-
-# Processing the name of the simulation (to be used in outputs)
-simu_name = 'Simu'
-
-if geometry_params["ar"] != 1:
-    next_param = 'AR' + str(geometry_params["ar"])
-    simu_name = '_'.join([simu_name, next_param])  # e.g: if cyl_size (mesh) = 0.025 --> simu_name += '_M25'
-if optimization_params["max_value_jet_MFR"] != 0.01:
-    next_param = 'maxF' + str(optimization_params["max_value_jet_MFR"])[2:]
-    simu_name = '_'.join([simu_name, next_param])  # e.g: if max_MFR = 0.09 --> simu_name += '_maxF9'
-if nb_actuations != 80:
-    next_param = 'NbAct' + str(nb_actuations)
-    simu_name = '_'.join([simu_name, next_param])  # e.g: if max_MFR = 100 --> simu_name += '_NbAct100'
-
-next_param = 'drag'
-if reward_function == 'recirculation_area':
-    next_param = 'area'
-if reward_function == 'max_recirculation_area':
-    next_param = 'max_area'
-elif reward_function == 'drag':
-    next_param = 'last_drag'
-elif reward_function == 'max_plain_drag':
-    next_param = 'max_plain_drag'
-elif reward_function == 'drag_plain_lift':
-    next_param = 'lift'
-elif reward_function == 'drag_avg_abs_lift':
-    next_param = 'avgAbsLift'
-simu_name = '_'.join([simu_name, next_param])
-
-
-example_environment = Monitor(Env2DCylinderModified(path_root=root,
-                                            geometry_params=geometry_params,
-                                            flow_params=flow_params,
-                                            solver_params=solver_params,
-                                            output_params=output_params,
-                                            optimization_params=optimization_params,
-                                            inspection_params=inspection_params,
-                                            n_iter_make_ready=n_iter,
-                                            verbose=verbose,
-                                            reward_function=reward_function,
-                                            number_steps_execution=number_steps_execution,
-                                            simu_name=simu_name))
 
 
 # If previous evaluation results exist, delete them
@@ -186,9 +34,16 @@ if(os.path.exists("saved_models/test_strategy.csv")):
 if(os.path.exists("saved_models/test_strategy_avg.csv")):
     os.remove("saved_models/test_strategy_avg.csv")
 
-def one_run():
-    print("Start simulation")
-    state = example_environment.reset()
+
+if __name__ == '__main__':
+
+    saver_restore = '/rds/general/user/jz1720/home/TQCFrameStack/RL_UROP-master/Cylinder2DFlowControlWithRL/saver_data/TQC_model_277140_steps.zip'
+    agent = TQC.load(saver_restore)
+    env = SubprocVecEnv([resume_env(nb_actuations,i) for i in range(1)], start_method='spawn')
+    env = VecFrameStack(env, n_stack=12)
+
+
+    state = env.reset()
     #example_environment.render = True
 
     action_step_size = simulation_duration / nb_actuations  # Duration of 1 train episode / actions in 1 episode
@@ -199,34 +54,6 @@ def one_run():
 
     for k in range(action_steps):
         action, _ = agent.predict(state, deterministic=True)
-        state, rw, done, _ = example_environment.step(action)
-
-    data = np.genfromtxt("saved_models/test_strategy.csv", delimiter=";")
-    data = data[1:,1:]
-    m_data = np.average(data[len(data)//2:], axis=0)  # Calculate means for the second half of the single episode
-    nb_jets = len(m_data)-4
-    # Print statistics
-    print("Single Run finished. AvgDrag : {}, AvgRecircArea : {}".format(m_data[1], m_data[2]))
-
-    # Output average values for the single run (Note that values for each timestep are already reported as we execute)
-    name = "test_strategy_avg.csv"
-    if(not os.path.exists("saved_models")):
-        os.mkdir("saved_models")
-    if(not os.path.exists("saved_models/"+name)):
-        with open("saved_models/"+name, "w") as csv_file:
-            spam_writer=csv.writer(csv_file, delimiter=";", lineterminator="\n")
-            spam_writer.writerow(["Name", "Drag", "Lift", "RecircArea"] + ["Jet" + str(v) for v in range(nb_jets)])
-            spam_writer.writerow([example_environment.simu_name] + m_data[1:].tolist())
-    else:
-        with open("saved_models/"+name, "a") as csv_file:
-            spam_writer=csv.writer(csv_file, delimiter=";", lineterminator="\n")
-            spam_writer.writerow([example_environment.simu_name] + m_data[1:].tolist())
-
-
-saver_restore = os.getcwd() + "/saver_data/" + "SAC_model_80_steps.zip"
-agent = SAC.load(saver_restore)
-
-
-
-one_run()
-os._exit(0)
+        state, rw, done, _ = env.step(action)
+~
+~
