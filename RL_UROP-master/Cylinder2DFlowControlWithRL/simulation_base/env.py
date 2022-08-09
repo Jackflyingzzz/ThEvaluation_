@@ -183,7 +183,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                                                 verbose=verbose,
                                                 reward_function=reward_function,
                                                 number_steps_execution=number_steps_execution,
-                                                simu_name=simu_name), max_episode_steps = horizon))
+                                                simu_name=simu_name), max_episode_steps = 100000000000000))
 
         return env_2d_cylinder
 
