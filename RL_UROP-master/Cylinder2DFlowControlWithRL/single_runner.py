@@ -55,5 +55,3 @@ if __name__ == '__main__':
     for k in range(action_steps):
         action, _ = agent.predict(state, deterministic=True)
         state, rw, done, _ = env.step(action)
-~
-~
