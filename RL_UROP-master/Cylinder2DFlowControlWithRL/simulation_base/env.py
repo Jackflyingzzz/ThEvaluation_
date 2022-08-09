@@ -28,7 +28,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                dump_CL=500,  # If not False, output step info of ep,step,rec_area,L,D,jets Q* to command line, every 'dump_CL' steps
                remesh=False,
                random_start=False,
-               single_run=False,
+               single_run=True,
                horizon=nb_actuations,
                n_env=1):
 
@@ -111,7 +111,7 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
                              "line_drag": -0.7221,  # Mean drag without control
                              "line_lift": 0,  # Mean lift without control
                              "show_all_at_reset": False,
-                             "single_run": single_run,
+                             "single_run": True,
                              'index': n_env
                              }
 
