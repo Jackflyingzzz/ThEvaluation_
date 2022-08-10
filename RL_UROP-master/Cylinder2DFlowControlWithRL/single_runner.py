@@ -37,7 +37,7 @@ if(os.path.exists("saved_models/test_strategy_avg.csv")):
 
 if __name__ == '__main__':
 
-    saver_restore = '/rds/general/user/jz1720/home/TQCFrameStack/RL_UROP-master/Cylinder2DFlowControlWithRL/saver_data/TQC_model_277140_steps.zip'
+    saver_restore = '/rds/general/user/jz1720/home/TQCFrameStack/RL_UROP-master/Cylinder2DFlowControlWithRL/saver_data/TQC_model_274040_steps.zip'
     agent = TQC.load(saver_restore)
     env = SubprocVecEnv([resume_env(nb_actuations,i) for i in range(1)], start_method='spawn')
     env = VecFrameStack(env, n_stack=12)
